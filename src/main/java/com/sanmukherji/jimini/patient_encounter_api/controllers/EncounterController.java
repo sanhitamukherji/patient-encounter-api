@@ -40,18 +40,16 @@ public class EncounterController
                 .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-//    @GetMapping()
-//    public ResponseEntity<List<EncounterDTO>> getAll(
-//
-//    @RequestParam(required = false) String patientId,
-//    @RequestParam(required = false) String providerId,
-//    @RequestParam(required = false) String encounterType,
-//    @RequestParam(required = false)
-//    Instant startDate,
-//    @RequestParam(required = false) Instant endDate) {
-//
-//        //if doesnt exist return empty bidy with objectNot exists error;
-//        return encounterService.getALl(encounterId);
-//
-//    }
+    @GetMapping
+    public ResponseEntity<List<EncounterDTO>> search(
+            @RequestParam(required = false) String patientId,
+            @RequestParam(required = false) String providerId,
+            @RequestParam(required = false) Instant startDate,
+            @RequestParam(required = false) Instant endDate) {
+
+        List<EncounterDTO> results = encounterService.search(
+                patientId, providerId, startDate, endDate);
+        return ResponseEntity.ok(results);
+    }
+
 }
