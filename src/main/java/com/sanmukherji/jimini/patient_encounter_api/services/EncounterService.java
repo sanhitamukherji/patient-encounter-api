@@ -1,7 +1,7 @@
 package com.sanmukherji.jimini.patient_encounter_api.services;
 
 import com.sanmukherji.jimini.patient_encounter_api.DTOs.EncounterDTO;
-import com.sanmukherji.jimini.patient_encounter_api.DTOs.EncounterEntity;
+import com.sanmukherji.jimini.patient_encounter_api.models.EncounterEntity;
 import com.sanmukherji.jimini.patient_encounter_api.repositories.EncounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
