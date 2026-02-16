@@ -39,7 +39,7 @@ public class EncounterEntity {
     private Instant updatedAt;
 
     @Column(nullable = false)
-    private String  updatedBy;
+    private String updatedBy;
 
     @PrePersist
     protected void onCreate() {
@@ -63,6 +63,7 @@ public class EncounterEntity {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public String getCreatedBy() { return createdBy; }
+    public String getUpdatedBy() { return updatedBy; }
 
     // Setters
     public void setPatientId(String patientId) { this.patientId = patientId; }
@@ -71,4 +72,5 @@ public class EncounterEntity {
     public void setType(EncounterType encounterType) { this.type = encounterType; }
     public void setClinicalData(String clinicalData) { this.clinicalData = clinicalData; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
 }

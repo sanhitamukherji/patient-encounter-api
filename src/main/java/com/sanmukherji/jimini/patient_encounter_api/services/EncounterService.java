@@ -101,6 +101,7 @@ public class EncounterService {
         entity.setType(dto.type());
         entity.setClinicalData(dto.clinicalData());
         entity.setCreatedBy(dto.createdBy());
+        entity.setUpdatedBy(dto.createdBy());
         return entity;
     }
 
@@ -114,7 +115,9 @@ public class EncounterService {
                 entity.getType(),
                 entity.getClinicalData(),
                 entity.getCreatedAt(),
-                entity.getCreatedBy()
+                entity.getCreatedBy(),
+                entity.getUpdatedAt(),
+                entity.getUpdatedBy()
         );
     }
     //overloading toDTO
