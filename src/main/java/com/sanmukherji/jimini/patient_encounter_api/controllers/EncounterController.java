@@ -2,6 +2,7 @@ package com.sanmukherji.jimini.patient_encounter_api.controllers;
 
 import com.sanmukherji.jimini.patient_encounter_api.DTOs.EncounterDTO;
 import com.sanmukherji.jimini.patient_encounter_api.services.EncounterService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -24,12 +25,21 @@ public class EncounterController
     }
 
     @PostMapping
-    public ResponseEntity<EncounterDTO> create(@RequestBody EncounterDTO encounter) {
+    public ResponseEntity<EncounterDTO> create(@Valid @RequestBody EncounterDTO encounter) {
 
         //persist
         EncounterDTO created = encounterService.create(encounter);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{encounterId}")
+    public ResponseEntity<EncounterDTO> update(
+            @PathVariable UUID encounterId,
+            @Valid @RequestBody EncounterDTO encounter) {
+        return encounterService.update(encounterId, encounter)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{encounterId}")

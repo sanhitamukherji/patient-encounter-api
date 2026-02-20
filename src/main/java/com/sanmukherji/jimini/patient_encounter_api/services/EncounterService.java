@@ -1,6 +1,7 @@
 package com.sanmukherji.jimini.patient_encounter_api.services;
 
 import com.sanmukherji.jimini.patient_encounter_api.DTOs.EncounterDTO;
+import com.sanmukherji.jimini.patient_encounter_api.exception.BadRequestException;
 import com.sanmukherji.jimini.patient_encounter_api.models.EncounterEntity;
 import com.sanmukherji.jimini.patient_encounter_api.repositories.EncounterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +19,14 @@ import java.util.stream.Collectors;
 @Service
 public class EncounterService {
     private static final int DEFAULT_DATE_RANGE_DAYS = 30;
+
     private final EncounterRepository encounterRepository;
+    private final AuditService auditService;
 
     @Autowired
-    public EncounterService(EncounterRepository encounterRepository) {
+    public EncounterService(EncounterRepository encounterRepository, AuditService auditService) {
         this.encounterRepository = encounterRepository;
+        this.auditService = auditService;
     }
 
     public EncounterDTO create(EncounterDTO dto) {
@@ -79,12 +83,12 @@ public class EncounterService {
                                       Instant endDate) {
 
         if (patientId == null && providerId == null && startDate == null && endDate == null) {
-            throw new IllegalArgumentException(
+            throw new BadRequestException(
                     "At least one filter is required: patientId, providerId, or date range");
         }
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException(
+            throw new BadRequestException(
                     "startDate must be before endDate");
         }
     }
@@ -101,7 +105,7 @@ public class EncounterService {
         entity.setType(dto.type());
         entity.setClinicalData(dto.clinicalData());
         entity.setCreatedBy(dto.createdBy());
-        entity.setUpdatedBy(dto.createdBy());
+        entity.setUpdatedBy(dto.createdBy()); //on creation, updatedby = createdby
         return entity;
     }
 
