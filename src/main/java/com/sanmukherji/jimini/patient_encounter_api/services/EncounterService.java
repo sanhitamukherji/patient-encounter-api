@@ -5,16 +5,15 @@ import com.sanmukherji.jimini.patient_encounter_api.exception.BadRequestExceptio
 import com.sanmukherji.jimini.patient_encounter_api.models.EncounterEntity;
 import com.sanmukherji.jimini.patient_encounter_api.repositories.EncounterRepository;
 import com.sanmukherji.jimini.patient_encounter_api.security.CurrentUserService;
+import com.sanmukherji.jimini.patient_encounter_api.security.PhiRedactionFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,7 +100,7 @@ public class EncounterService {
                 "SEARCH",
                 null,
                 userId,
-                auditDetails
+                PhiRedactionFilter.redact(auditDetails)
         );
 
         validateSearchParams(patientId, providerId, startDate, endDate);
