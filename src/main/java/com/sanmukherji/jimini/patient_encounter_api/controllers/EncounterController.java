@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/encounter")
+@RequestMapping("/encounters")
 public class EncounterController
 {
     private final EncounterService encounterService;
@@ -45,7 +45,7 @@ public class EncounterController
     @GetMapping("/{encounterId}")
     public ResponseEntity<EncounterDTO> getById(@PathVariable UUID encounterId) {
 
-        //if doesnt exist return empty bidy with objectNot found 404 error;
+        //if doesnt exist return empty body with objectNot found 404 error;
         return encounterService.getById(encounterId)
                 .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
