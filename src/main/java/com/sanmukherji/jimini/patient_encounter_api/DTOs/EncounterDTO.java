@@ -24,9 +24,9 @@ public record EncounterDTO(
 
         Instant createdAt,
 
-        @NotBlank(message = "createdBy is required")
-        String createdBy,
+        String createdBy, // No validation — server sets from JWT
         Instant updatedAt,
 
-        String updatedBy) {
+        String updatedBy // No validation — server sets from JWT
+         ) {
 }

@@ -4,6 +4,7 @@ import com.sanmukherji.jimini.patient_encounter_api.DTOs.EncounterDTO;
 import com.sanmukherji.jimini.patient_encounter_api.exception.BadRequestException;
 import com.sanmukherji.jimini.patient_encounter_api.models.EncounterEntity;
 import com.sanmukherji.jimini.patient_encounter_api.repositories.EncounterRepository;
+import com.sanmukherji.jimini.patient_encounter_api.security.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,34 +23,37 @@ public class EncounterService {
 
     private final EncounterRepository encounterRepository;
     private final AuditService auditService;
+    private final CurrentUserService currentUserService;
 
     @Autowired
-    public EncounterService(EncounterRepository encounterRepository, AuditService auditService) {
+    public EncounterService(EncounterRepository encounterRepository, AuditService auditService, CurrentUserService currentUserService) {
         this.encounterRepository = encounterRepository;
         this.auditService = auditService;
+        this.currentUserService = currentUserService;
     }
 
     public EncounterDTO create(EncounterDTO dto) {
-        EncounterEntity entity = toEntity(dto);
+        String userId = currentUserService.getCurrentUserId();
+        EncounterEntity entity = toEntity(dto, userId);
         EncounterEntity saved = encounterRepository.save(entity);
 
         // Log the creation
         auditService.log(
                 "CREATE",
                 saved.getEncounterId().toString(),
-                dto.createdBy(),
+                userId,
                 null
         );
         return toDTO(saved);
     }
 
     public Optional<EncounterDTO> getById(UUID encounterId) {
-
+        String userId = currentUserService.getCurrentUserId();
         // Log the access (even if not found)
         auditService.log(
                 "READ",
                 encounterId.toString(),
-                "SYSTEM",           // will be replaced with JWT user later
+                userId,
                 null
         );
         return encounterRepository.findById(encounterId)
@@ -58,9 +62,9 @@ public class EncounterService {
     }
 
     public Optional<EncounterDTO> update(UUID encounterId, EncounterDTO dto) {
-
+        String userId = currentUserService.getCurrentUserId();
         auditService.log("UPDATE", encounterId.toString(),
-                dto.createdBy(), null);
+                userId, null);
 
         if (dto.encounterId() != null && !dto.encounterId().equals(encounterId.toString())) {
             throw new BadRequestException(
@@ -75,7 +79,7 @@ public class EncounterService {
                     if (dto.encounterDate() != null) existing.setEncounterDate(dto.encounterDate());
                     if (dto.type() != null) existing.setType(dto.type());
                     if (dto.clinicalData() != null) existing.setClinicalData(dto.clinicalData());
-                    if (dto.createdBy() != null) existing.setUpdatedBy(dto.createdBy());
+                    existing.setUpdatedBy(userId);
 
                     EncounterEntity saved = encounterRepository.save(existing);
 
@@ -87,7 +91,7 @@ public class EncounterService {
                                      String providerId,
                                      Instant startDate,
                                      Instant endDate) {
-
+        String userId = currentUserService.getCurrentUserId();
         // Log the search (even if not valid)
         String auditDetails = "patientId=" + patientId + ",providerId=" + providerId + ((startDate != null)?
                 ",startDate=" + startDate : "" ) + ((endDate != null)?
@@ -96,7 +100,7 @@ public class EncounterService {
         auditService.log(
                 "SEARCH",
                 null,
-                "SYSTEM",
+                userId,
                 auditDetails
         );
 
@@ -151,15 +155,15 @@ public class EncounterService {
 
     // ---- Mapping helpers ----
 
-    private EncounterEntity toEntity(EncounterDTO dto) {
+    private EncounterEntity toEntity(EncounterDTO dto, String userId) {
         EncounterEntity entity = new EncounterEntity();
         entity.setPatientId(dto.patientId());
         entity.setProviderId(dto.providerId());
         entity.setEncounterDate(dto.encounterDate());
         entity.setType(dto.type());
         entity.setClinicalData(dto.clinicalData());
-        entity.setCreatedBy(dto.createdBy());
-        entity.setUpdatedBy(dto.createdBy()); //on creation, updatedby = createdby
+        entity.setCreatedBy(userId);
+        entity.setUpdatedBy(userId); //on creation, updatedby = createdby
         return entity;
     }
 
