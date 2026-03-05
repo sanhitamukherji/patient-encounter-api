@@ -33,10 +33,10 @@ public class EncounterController
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{encounterId}")
+    @PatchMapping("/{encounterId}")
     public ResponseEntity<EncounterDTO> update(
             @PathVariable UUID encounterId,
-            @Valid @RequestBody EncounterDTO encounter) {
+            @RequestBody EncounterDTO encounter) {    // No @Valid — partial updates
         return encounterService.update(encounterId, encounter)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

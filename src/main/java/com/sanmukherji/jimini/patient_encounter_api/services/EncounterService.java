@@ -32,19 +32,73 @@ public class EncounterService {
     public EncounterDTO create(EncounterDTO dto) {
         EncounterEntity entity = toEntity(dto);
         EncounterEntity saved = encounterRepository.save(entity);
+
+        // Log the creation
+        auditService.log(
+                "CREATE",
+                saved.getEncounterId().toString(),
+                dto.createdBy(),
+                null
+        );
         return toDTO(saved);
     }
 
     public Optional<EncounterDTO> getById(UUID encounterId) {
+
+        // Log the access (even if not found)
+        auditService.log(
+                "READ",
+                encounterId.toString(),
+                "SYSTEM",           // will be replaced with JWT user later
+                null
+        );
         return encounterRepository.findById(encounterId)
                 .map(this::toDTO);
 
+    }
+
+    public Optional<EncounterDTO> update(UUID encounterId, EncounterDTO dto) {
+
+        auditService.log("UPDATE", encounterId.toString(),
+                dto.createdBy(), null);
+
+        if (dto.encounterId() != null && !dto.encounterId().equals(encounterId.toString())) {
+            throw new BadRequestException(
+                    "encounterId in path and body do not match");
+        }
+
+        return encounterRepository.findById(encounterId)
+                .map(existing -> {
+                    // Only update fields that were provided
+                    if (dto.patientId() != null) existing.setPatientId(dto.patientId());
+                    if (dto.providerId() != null) existing.setProviderId(dto.providerId());
+                    if (dto.encounterDate() != null) existing.setEncounterDate(dto.encounterDate());
+                    if (dto.type() != null) existing.setType(dto.type());
+                    if (dto.clinicalData() != null) existing.setClinicalData(dto.clinicalData());
+                    if (dto.createdBy() != null) existing.setUpdatedBy(dto.createdBy());
+
+                    EncounterEntity saved = encounterRepository.save(existing);
+
+                    return toDTO(saved);
+                });
     }
 
     public List<EncounterDTO> search(String patientId,
                                      String providerId,
                                      Instant startDate,
                                      Instant endDate) {
+
+        // Log the search (even if not valid)
+        String auditDetails = "patientId=" + patientId + ",providerId=" + providerId + ((startDate != null)?
+                ",startDate=" + startDate : "" ) + ((endDate != null)?
+                ",endDate=" + endDate : "" );
+
+        auditService.log(
+                "SEARCH",
+                null,
+                "SYSTEM",
+                auditDetails
+        );
 
         validateSearchParams(patientId, providerId, startDate, endDate);
 
